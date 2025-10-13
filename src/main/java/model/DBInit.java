@@ -6,7 +6,6 @@ import jakarta.persistence.Persistence;
 public class DBInit {
     public static void main(String[] args) {
         try {
-            // "jeePU" matches your persistence.xml
             EntityManagerFactory emf = Persistence.createEntityManagerFactory("default");
             emf.close();
             System.out.println("✅ Tables created successfully in PostgreSQL!");

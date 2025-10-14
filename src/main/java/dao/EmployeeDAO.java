@@ -69,4 +69,15 @@ public class EmployeeDAO {
             session.close();
         }
     }
+
+    public Employee findByEmail(String email) {
+        Session session = HibernateUtil.getSessionFactory().openSession();
+        try {
+            return session.createQuery("FROM Employee e WHERE e.email = :email", Employee.class)
+                    .setParameter("email", email)
+                    .uniqueResult(); // returns null if not found
+        } finally {
+            session.close();
+        }
+    }
 }

@@ -5,7 +5,7 @@ import jakarta.persistence.*;
 import model.enums.Role;
 
 @Entity
-@Table(name = "doctor", uniqueConstraints = {
+@Table(name = "employee", uniqueConstraints = {
         @UniqueConstraint(name = "email_unique", columnNames = "email")
 })
 public abstract class Employee {

@@ -34,6 +34,8 @@ public class Creneau {
     @Column(name = "creneau_status", nullable = false)
     private CreneauStatus creneauStatus;
 
+
+
     public Creneau() {}
 
     public Creneau(Long id, LocalDateTime dateHeureDebut, LocalDateTime dateHeureFin, CreneauStatus creneauStatus) {
@@ -74,6 +76,8 @@ public class Creneau {
     public void setCreneauStatus(CreneauStatus creneauStatus) {
         this.creneauStatus = creneauStatus;
     }
+
+
 
     @Override
     public String toString() {

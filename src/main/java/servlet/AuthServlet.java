@@ -12,21 +12,30 @@ import model.Specialiste;
 import model.Infirmier;
 import model.enums.Role;
 import model.enums.Specialite;
-import model.enums.CreneauStatus;
-import model.Creneau;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.time.LocalDate;
-import java.util.List;
-import java.util.ArrayList;
 import service.AuthService;
 
 import java.io.IOException;
 
 @WebServlet("/auth")
 public class AuthServlet extends HttpServlet {
+    
     private AuthService authService = new AuthService();
-
+    
+    @Override
+    protected void doGet(HttpServletRequest request, HttpServletResponse response) 
+            throws ServletException, IOException {
+        // Handle logout
+        HttpSession session = request.getSession(false);
+        if (session != null) {
+            Employee user = (Employee) session.getAttribute("user");
+            if (user != null) {
+                authService.logout(user.getEmail());
+            }
+            session.invalidate();
+        }
+        response.sendRedirect("login.jsp");
+    }
+    
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) 
             throws ServletException, IOException {
@@ -39,33 +48,22 @@ public class AuthServlet extends HttpServlet {
             handleRegister(request, response);
         }
     }
-
+    
     private void handleLogin(HttpServletRequest request, HttpServletResponse response) 
             throws ServletException, IOException {
         
         String email = request.getParameter("email");
         String password = request.getParameter("password");
-
+        
         try {
             Employee employee = authService.login(email, password);
             
             if (employee != null) {
                 HttpSession session = request.getSession();
-                session.setAttribute("employee", employee);
-                session.setAttribute("role", employee.getRole());
+                session.setAttribute("user", employee);
+                session.setAttribute("userRole", employee.getRole());
                 
-                // Redirect based on role
-                switch (employee.getRole()) {
-                    case GENERALISTE:
-                        response.sendRedirect("generaliste/dashboard.jsp");
-                        break;
-                    case SPECIALISTE:
-                        response.sendRedirect("specialiste/dashboard.jsp");
-                        break;
-                    case INFIRMIER:
-                        response.sendRedirect("infirmier/dashboard.jsp");
-                        break;
-                }
+                response.sendRedirect("dashboard.jsp");
             } else {
                 request.setAttribute("error", "Email ou mot de passe incorrect");
                 request.getRequestDispatcher("login.jsp").forward(request, response);
@@ -75,7 +73,7 @@ public class AuthServlet extends HttpServlet {
             request.getRequestDispatcher("login.jsp").forward(request, response);
         }
     }
-
+    
     private void handleRegister(HttpServletRequest request, HttpServletResponse response) 
             throws ServletException, IOException {
         
@@ -84,61 +82,32 @@ public class AuthServlet extends HttpServlet {
         String email = request.getParameter("email");
         String password = request.getParameter("password");
         String roleStr = request.getParameter("role");
-
+        
         try {
             Role role = Role.valueOf(roleStr);
             Employee employee;
             
-            // Create specific employee type based on role
             switch (role) {
                 case GENERALISTE:
                     employee = new Generaliste();
                     break;
                 case SPECIALISTE:
+                    employee = new Specialiste();
                     String specialiteStr = request.getParameter("specialite");
                     String tarifStr = request.getParameter("tarif");
                     
-                    if (specialiteStr == null || specialiteStr.isEmpty()) {
-                        throw new IllegalArgumentException("Spécialité requise pour un spécialiste");
+                    if (specialiteStr != null && !specialiteStr.isEmpty()) {
+                        ((Specialiste) employee).setSpecialite(Specialite.valueOf(specialiteStr));
                     }
-                    if (tarifStr == null || tarifStr.isEmpty()) {
-                        throw new IllegalArgumentException("Tarif requis pour un spécialiste");
-                    }
-                    
-                    Specialite specialite = Specialite.valueOf(specialiteStr);
-                    Double tarif = Double.parseDouble(tarifStr);
-                    String[] creneauxValues = request.getParameterValues("creneaux");
-                    
-                    employee = new Specialiste();
-                    ((Specialiste) employee).setSpecialite(specialite);
-                    ((Specialiste) employee).setTarif(tarif);
-                    
-                    // Create creneaux if selected
-                    if (creneauxValues != null) {
-                        List<Creneau> creneaux = new ArrayList<>();
-                        LocalDate today = LocalDate.now();
-                        
-                        for (String creneauValue : creneauxValues) {
-                            String[] times = creneauValue.split("-");
-                            LocalTime startTime = LocalTime.parse(times[0]);
-                            LocalTime endTime = LocalTime.parse(times[1]);
-                            
-                            Creneau creneau = new Creneau();
-                            creneau.setDateHeureDebut(LocalDateTime.of(today, startTime));
-                            creneau.setDateHeureFin(LocalDateTime.of(today, endTime));
-                            creneau.setCreneauStatus(CreneauStatus.DISPONIBLE);
-
-                            
-                            creneaux.add(creneau);
-                        }
-                        ((Specialiste) employee).setCreneaux(creneaux);
+                    if (tarifStr != null && !tarifStr.isEmpty()) {
+                        ((Specialiste) employee).setTarif(Double.parseDouble(tarifStr));
                     }
                     break;
                 case INFIRMIER:
                     employee = new Infirmier();
                     break;
                 default:
-                    throw new IllegalArgumentException("Invalid role");
+                    throw new IllegalArgumentException("Rôle invalide");
             }
             
             employee.setNom(nom);
@@ -146,14 +115,14 @@ public class AuthServlet extends HttpServlet {
             employee.setEmail(email);
             employee.setPasswordHash(password);
             employee.setRole(role);
-
+            
             authService.register(employee);
             
-            request.setAttribute("success", "Compte créé avec succès. Vous pouvez vous connecter.");
+            request.setAttribute("success", "Inscription réussie! Vous pouvez maintenant vous connecter.");
             request.getRequestDispatcher("login.jsp").forward(request, response);
             
         } catch (Exception e) {
-            request.setAttribute("error", "Erreur lors de la création du compte: " + e.getMessage());
+            request.setAttribute("error", "Erreur lors de l'inscription: " + e.getMessage());
             request.getRequestDispatcher("register.jsp").forward(request, response);
         }
     }

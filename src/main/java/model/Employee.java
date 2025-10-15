@@ -12,11 +12,11 @@ public abstract class Employee {
 
     @Id
     @SequenceGenerator(
-            name = "doctor_sequence",
-            sequenceName = "doctor_sequence",
+            name = "employee_sequence",
+            sequenceName = "employee_sequence",
             allocationSize = 1
     )
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "doctor_sequence")
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "employee_sequence")
     @Column(name = "id", updatable = false)
     private Long id;
 
@@ -109,7 +109,7 @@ public abstract class Employee {
 
     @Override
     public String toString() {
-        return "Doctor{" +
+        return "Employee{" +
                 "id=" + id +
                 ", nom='" + nom + '\'' +
                 ", prenom='" + prenom + '\'' +

@@ -1,72 +1,74 @@
 package dao;
 
+import jakarta.persistence.EntityManager;
 import model.Specialiste;
-import org.hibernate.Session;
-import org.hibernate.Transaction;
 import java.util.List;
 
 public class SpecialisteDAO {
 
     public void save(Specialiste specialiste) {
-        Session session = HibernateUtil.getSessionFactory().openSession();
-        Transaction tx = null;
+        EntityManager em = JPAUtil.getEntityManager();
         try {
-            tx = session.beginTransaction();
-            session.persist(specialiste);
-            tx.commit();
+            em.getTransaction().begin();
+            em.persist(specialiste);
+            em.getTransaction().commit();
         } catch (Exception e) {
-            if (tx != null) tx.rollback();
+            if (em.getTransaction().isActive()) {
+                em.getTransaction().rollback();
+            }
             throw e;
         } finally {
-            session.close();
+            em.close();
         }
     }
 
     public void update(Specialiste specialiste) {
-        Session session = HibernateUtil.getSessionFactory().openSession();
-        Transaction tx = null;
+        EntityManager em = JPAUtil.getEntityManager();
         try {
-            tx = session.beginTransaction();
-            session.merge(specialiste);
-            tx.commit();
+            em.getTransaction().begin();
+            em.merge(specialiste);
+            em.getTransaction().commit();
         } catch (Exception e) {
-            if (tx != null) tx.rollback();
+            if (em.getTransaction().isActive()) {
+                em.getTransaction().rollback();
+            }
             throw e;
         } finally {
-            session.close();
+            em.close();
         }
     }
 
     public void delete(Specialiste specialiste) {
-        Session session = HibernateUtil.getSessionFactory().openSession();
-        Transaction tx = null;
+        EntityManager em = JPAUtil.getEntityManager();
         try {
-            tx = session.beginTransaction();
-            session.remove(specialiste);
-            tx.commit();
+            em.getTransaction().begin();
+            em.remove(em.merge(specialiste));
+            em.getTransaction().commit();
         } catch (Exception e) {
-            if (tx != null) tx.rollback();
+            if (em.getTransaction().isActive()) {
+                em.getTransaction().rollback();
+            }
             throw e;
         } finally {
-            session.close();
+            em.close();
         }
     }
 
     public Specialiste findById(Long id) {
-        Session session = HibernateUtil.getSessionFactory().openSession();
+        EntityManager em = JPAUtil.getEntityManager();
         try {
-            return session.find(Specialiste.class, id);
+            return em.find(Specialiste.class, id);
         } finally {
-            session.close();
+            em.close();
         }
     }
 
     public List<Specialiste> findAll() {
-        Session session = HibernateUtil.getSessionFactory().openSession();
+        EntityManager em = JPAUtil.getEntityManager();
         try {
-            return session.createQuery("FROM Specialiste", Specialiste.class).getResultList();
+            return em.createQuery("FROM Specialiste", Specialiste.class).getResultList();
         } finally {
-            session.close();
+            em.close();
         }
     }
 }

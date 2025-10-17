@@ -10,10 +10,10 @@ import java.util.ArrayList;
 public class Specialiste extends Employee {
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "specialite", nullable = false)
+    @Column(name = "specialite")
     private Specialite specialite;
 
-    @Column(name = "tarif", nullable = false)
+    @Column(name = "tarif")
     private Double tarif;
 
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)

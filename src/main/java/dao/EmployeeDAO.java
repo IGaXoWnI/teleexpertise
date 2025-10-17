@@ -1,83 +1,89 @@
 package dao;
 
+import jakarta.persistence.EntityManager;
 import model.Employee;
-import org.hibernate.Session;
-import org.hibernate.Transaction;
+
+
 import java.util.List;
 
 public class EmployeeDAO {
 
     public void save(Employee employee) {
-        Session session = HibernateUtil.getSessionFactory().openSession();
-        Transaction tx = null;
+        EntityManager em = JPAUtil.getEntityManager();
         try {
-            tx = session.beginTransaction();
-            session.persist(employee);
-            tx.commit();
+            em.getTransaction().begin();
+            em.persist(employee);
+            em.getTransaction().commit();
         } catch (Exception e) {
-            if (tx != null) tx.rollback();
+            if (em.getTransaction().isActive()) {
+                em.getTransaction().rollback();
+            }
             throw e;
         } finally {
-            session.close();
+            em.close();
         }
     }
 
     public void update(Employee employee) {
-        Session session = HibernateUtil.getSessionFactory().openSession();
-        Transaction tx = null;
+        EntityManager em = JPAUtil.getEntityManager();
         try {
-            tx = session.beginTransaction();
-            session.merge(employee);
-            tx.commit();
+            em.getTransaction().begin();
+            em.merge(employee);
+            em.getTransaction().commit();
         } catch (Exception e) {
-            if (tx != null) tx.rollback();
+            if (em.getTransaction().isActive()) {
+                em.getTransaction().rollback();
+            }
             throw e;
         } finally {
-            session.close();
+            em.close();
         }
     }
 
     public void delete(Employee employee) {
-        Session session = HibernateUtil.getSessionFactory().openSession();
-        Transaction tx = null;
+        EntityManager em = JPAUtil.getEntityManager();
         try {
-            tx = session.beginTransaction();
-            session.remove(employee);
-            tx.commit();
+            em.getTransaction().begin();
+            em.remove(em.merge(employee));
+            em.getTransaction().commit();
         } catch (Exception e) {
-            if (tx != null) tx.rollback();
+            if (em.getTransaction().isActive()) {
+                em.getTransaction().rollback();
+            }
             throw e;
         } finally {
-            session.close();
+            em.close();
         }
     }
 
     public Employee findById(Long id) {
-        Session session = HibernateUtil.getSessionFactory().openSession();
+        EntityManager em = JPAUtil.getEntityManager();
         try {
-            return session.find(Employee.class, id);
+            return em.find(Employee.class, id);
         } finally {
-            session.close();
+            em.close();
         }
     }
 
     public List<Employee> findAll() {
-        Session session = HibernateUtil.getSessionFactory().openSession();
+        EntityManager em = JPAUtil.getEntityManager();
         try {
-            return session.createQuery("FROM Employee", Employee.class).getResultList();
+            return em.createQuery("FROM Employee", Employee.class).getResultList();
         } finally {
-            session.close();
+            em.close();
         }
     }
 
     public Employee findByEmail(String email) {
-        Session session = HibernateUtil.getSessionFactory().openSession();
+        EntityManager em = JPAUtil.getEntityManager();
         try {
-            return session.createQuery("FROM Employee e WHERE e.email = :email", Employee.class)
+            return em.createQuery("FROM Employee e WHERE e.email = :email", Employee.class)
                     .setParameter("email", email)
-                    .uniqueResult(); // returns null if not found
+                    .getResultStream()
+                    .findFirst()
+                    .orElse(null);
         } finally {
-            session.close();
+            em.close();
         }
     }
 }

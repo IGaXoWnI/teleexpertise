@@ -1,72 +1,74 @@
 package dao;
 
+import jakarta.persistence.EntityManager;
 import model.DemandeExpertise;
-import org.hibernate.Session;
-import org.hibernate.Transaction;
 import java.util.List;
 
 public class DemandeExpertiseDAO {
 
     public void save(DemandeExpertise demandeExpertise) {
-        Session session = HibernateUtil.getSessionFactory().openSession();
-        Transaction tx = null;
+        EntityManager em = JPAUtil.getEntityManager();
         try {
-            tx = session.beginTransaction();
-            session.persist(demandeExpertise);
-            tx.commit();
+            em.getTransaction().begin();
+            em.persist(demandeExpertise);
+            em.getTransaction().commit();
         } catch (Exception e) {
-            if (tx != null) tx.rollback();
+            if (em.getTransaction().isActive()) {
+                em.getTransaction().rollback();
+            }
             throw e;
         } finally {
-            session.close();
+            em.close();
         }
     }
 
     public void update(DemandeExpertise demandeExpertise) {
-        Session session = HibernateUtil.getSessionFactory().openSession();
-        Transaction tx = null;
+        EntityManager em = JPAUtil.getEntityManager();
         try {
-            tx = session.beginTransaction();
-            session.merge(demandeExpertise);
-            tx.commit();
+            em.getTransaction().begin();
+            em.merge(demandeExpertise);
+            em.getTransaction().commit();
         } catch (Exception e) {
-            if (tx != null) tx.rollback();
+            if (em.getTransaction().isActive()) {
+                em.getTransaction().rollback();
+            }
             throw e;
         } finally {
-            session.close();
+            em.close();
         }
     }
 
     public void delete(DemandeExpertise demandeExpertise) {
-        Session session = HibernateUtil.getSessionFactory().openSession();
-        Transaction tx = null;
+        EntityManager em = JPAUtil.getEntityManager();
         try {
-            tx = session.beginTransaction();
-            session.remove(demandeExpertise);
-            tx.commit();
+            em.getTransaction().begin();
+            em.remove(em.merge(demandeExpertise));
+            em.getTransaction().commit();
         } catch (Exception e) {
-            if (tx != null) tx.rollback();
+            if (em.getTransaction().isActive()) {
+                em.getTransaction().rollback();
+            }
             throw e;
         } finally {
-            session.close();
+            em.close();
         }
     }
 
     public DemandeExpertise findById(Long id) {
-        Session session = HibernateUtil.getSessionFactory().openSession();
+        EntityManager em = JPAUtil.getEntityManager();
         try {
-            return session.find(DemandeExpertise.class, id);
+            return em.find(DemandeExpertise.class, id);
         } finally {
-            session.close();
+            em.close();
         }
     }
 
     public List<DemandeExpertise> findAll() {
-        Session session = HibernateUtil.getSessionFactory().openSession();
+        EntityManager em = JPAUtil.getEntityManager();
         try {
-            return session.createQuery("FROM DemandeExpertise", DemandeExpertise.class).getResultList();
+            return em.createQuery("FROM DemandeExpertise", DemandeExpertise.class).getResultList();
         } finally {
-            session.close();
+            em.close();
         }
     }
 }

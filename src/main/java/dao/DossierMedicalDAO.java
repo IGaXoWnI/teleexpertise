@@ -1,72 +1,74 @@
 package dao;
 
+import jakarta.persistence.EntityManager;
 import model.DossierMedical;
-import org.hibernate.Session;
-import org.hibernate.Transaction;
 import java.util.List;
 
 public class DossierMedicalDAO {
 
     public void save(DossierMedical dossierMedical) {
-        Session session = HibernateUtil.getSessionFactory().openSession();
-        Transaction tx = null;
+        EntityManager em = JPAUtil.getEntityManager();
         try {
-            tx = session.beginTransaction();
-            session.persist(dossierMedical);
-            tx.commit();
+            em.getTransaction().begin();
+            em.persist(dossierMedical);
+            em.getTransaction().commit();
         } catch (Exception e) {
-            if (tx != null) tx.rollback();
+            if (em.getTransaction().isActive()) {
+                em.getTransaction().rollback();
+            }
             throw e;
         } finally {
-            session.close();
+            em.close();
         }
     }
 
     public void update(DossierMedical dossierMedical) {
-        Session session = HibernateUtil.getSessionFactory().openSession();
-        Transaction tx = null;
+        EntityManager em = JPAUtil.getEntityManager();
         try {
-            tx = session.beginTransaction();
-            session.merge(dossierMedical);
-            tx.commit();
+            em.getTransaction().begin();
+            em.merge(dossierMedical);
+            em.getTransaction().commit();
         } catch (Exception e) {
-            if (tx != null) tx.rollback();
+            if (em.getTransaction().isActive()) {
+                em.getTransaction().rollback();
+            }
             throw e;
         } finally {
-            session.close();
+            em.close();
         }
     }
 
     public void delete(DossierMedical dossierMedical) {
-        Session session = HibernateUtil.getSessionFactory().openSession();
-        Transaction tx = null;
+        EntityManager em = JPAUtil.getEntityManager();
         try {
-            tx = session.beginTransaction();
-            session.remove(dossierMedical);
-            tx.commit();
+            em.getTransaction().begin();
+            em.remove(em.merge(dossierMedical));
+            em.getTransaction().commit();
         } catch (Exception e) {
-            if (tx != null) tx.rollback();
+            if (em.getTransaction().isActive()) {
+                em.getTransaction().rollback();
+            }
             throw e;
         } finally {
-            session.close();
+            em.close();
         }
     }
 
     public DossierMedical findById(Long id) {
-        Session session = HibernateUtil.getSessionFactory().openSession();
+        EntityManager em = JPAUtil.getEntityManager();
         try {
-            return session.find(DossierMedical.class, id);
+            return em.find(DossierMedical.class, id);
         } finally {
-            session.close();
+            em.close();
         }
     }
 
     public List<DossierMedical> findAll() {
-        Session session = HibernateUtil.getSessionFactory().openSession();
+        EntityManager em = JPAUtil.getEntityManager();
         try {
-            return session.createQuery("FROM DossierMedical", DossierMedical.class).getResultList();
+            return em.createQuery("FROM DossierMedical", DossierMedical.class).getResultList();
         } finally {
-            session.close();
+            em.close();
         }
     }
 }

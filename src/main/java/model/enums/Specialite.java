@@ -1,7 +1,10 @@
 package model.enums;
 
 public enum Specialite {
-    CARDIOLOGIE,
-    PNEUMOLOGIE,
-
+    CARDIOLOGUE,
+    PNEUMOLOGUE,
+    DERMATOLOGUE,
+    NEUROLOGUE,
+    ENDOCRINOLOGUE,
+    RADIOLOGUE
 }

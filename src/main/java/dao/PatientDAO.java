@@ -1,72 +1,74 @@
 package dao;
 
+import jakarta.persistence.EntityManager;
 import model.Patient;
-import org.hibernate.Session;
-import org.hibernate.Transaction;
 import java.util.List;
 
 public class PatientDAO {
 
     public void save(Patient patient) {
-        Session session = HibernateUtil.getSessionFactory().openSession();
-        Transaction tx = null;
+        EntityManager em = JPAUtil.getEntityManager();
         try {
-            tx = session.beginTransaction();
-            session.persist(patient);
-            tx.commit();
+            em.getTransaction().begin();
+            em.persist(patient);
+            em.getTransaction().commit();
         } catch (Exception e) {
-            if (tx != null) tx.rollback();
+            if (em.getTransaction().isActive()) {
+                em.getTransaction().rollback();
+            }
             throw e;
         } finally {
-            session.close();
+            em.close();
         }
     }
 
     public void update(Patient patient) {
-        Session session = HibernateUtil.getSessionFactory().openSession();
-        Transaction tx = null;
+        EntityManager em = JPAUtil.getEntityManager();
         try {
-            tx = session.beginTransaction();
-            session.merge(patient);
-            tx.commit();
+            em.getTransaction().begin();
+            em.merge(patient);
+            em.getTransaction().commit();
         } catch (Exception e) {
-            if (tx != null) tx.rollback();
+            if (em.getTransaction().isActive()) {
+                em.getTransaction().rollback();
+            }
             throw e;
         } finally {
-            session.close();
+            em.close();
         }
     }
 
     public void delete(Patient patient) {
-        Session session = HibernateUtil.getSessionFactory().openSession();
-        Transaction tx = null;
+        EntityManager em = JPAUtil.getEntityManager();
         try {
-            tx = session.beginTransaction();
-            session.remove(patient);
-            tx.commit();
+            em.getTransaction().begin();
+            em.remove(em.merge(patient));
+            em.getTransaction().commit();
         } catch (Exception e) {
-            if (tx != null) tx.rollback();
+            if (em.getTransaction().isActive()) {
+                em.getTransaction().rollback();
+            }
             throw e;
         } finally {
-            session.close();
+            em.close();
         }
     }
 
     public Patient findById(Long id) {
-        Session session = HibernateUtil.getSessionFactory().openSession();
+        EntityManager em = JPAUtil.getEntityManager();
         try {
-            return session.find(Patient.class, id);
+            return em.find(Patient.class, id);
         } finally {
-            session.close();
+            em.close();
         }
     }
 
     public List<Patient> findAll() {
-        Session session = HibernateUtil.getSessionFactory().openSession();
+        EntityManager em = JPAUtil.getEntityManager();
         try {
-            return session.createQuery("FROM Patient", Patient.class).getResultList();
+            return em.createQuery("FROM Patient", Patient.class).getResultList();
         } finally {
-            session.close();
+            em.close();
         }
     }
 }

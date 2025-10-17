@@ -1,72 +1,74 @@
 package dao;
 
+import jakarta.persistence.EntityManager;
 import model.ActeTechnique;
-import org.hibernate.Session;
-import org.hibernate.Transaction;
 import java.util.List;
 
 public class ActeTechniqueDAO {
 
     public void save(ActeTechnique acteTechnique) {
-        Session session = HibernateUtil.getSessionFactory().openSession();
-        Transaction tx = null;
+        EntityManager em = JPAUtil.getEntityManager();
         try {
-            tx = session.beginTransaction();
-            session.persist(acteTechnique);
-            tx.commit();
+            em.getTransaction().begin();
+            em.persist(acteTechnique);
+            em.getTransaction().commit();
         } catch (Exception e) {
-            if (tx != null) tx.rollback();
+            if (em.getTransaction().isActive()) {
+                em.getTransaction().rollback();
+            }
             throw e;
         } finally {
-            session.close();
+            em.close();
         }
     }
 
     public void update(ActeTechnique acteTechnique) {
-        Session session = HibernateUtil.getSessionFactory().openSession();
-        Transaction tx = null;
+        EntityManager em = JPAUtil.getEntityManager();
         try {
-            tx = session.beginTransaction();
-            session.merge(acteTechnique);
-            tx.commit();
+            em.getTransaction().begin();
+            em.merge(acteTechnique);
+            em.getTransaction().commit();
         } catch (Exception e) {
-            if (tx != null) tx.rollback();
+            if (em.getTransaction().isActive()) {
+                em.getTransaction().rollback();
+            }
             throw e;
         } finally {
-            session.close();
+            em.close();
         }
     }
 
     public void delete(ActeTechnique acteTechnique) {
-        Session session = HibernateUtil.getSessionFactory().openSession();
-        Transaction tx = null;
+        EntityManager em = JPAUtil.getEntityManager();
         try {
-            tx = session.beginTransaction();
-            session.remove(acteTechnique);
-            tx.commit();
+            em.getTransaction().begin();
+            em.remove(em.merge(acteTechnique));
+            em.getTransaction().commit();
         } catch (Exception e) {
-            if (tx != null) tx.rollback();
+            if (em.getTransaction().isActive()) {
+                em.getTransaction().rollback();
+            }
             throw e;
         } finally {
-            session.close();
+            em.close();
         }
     }
 
     public ActeTechnique findById(Long id) {
-        Session session = HibernateUtil.getSessionFactory().openSession();
+        EntityManager em = JPAUtil.getEntityManager();
         try {
-            return session.find(ActeTechnique.class, id);
+            return em.find(ActeTechnique.class, id);
         } finally {
-            session.close();
+            em.close();
         }
     }
 
     public List<ActeTechnique> findAll() {
-        Session session = HibernateUtil.getSessionFactory().openSession();
+        EntityManager em = JPAUtil.getEntityManager();
         try {
-            return session.createQuery("FROM ActeTechnique", ActeTechnique.class).getResultList();
+            return em.createQuery("FROM ActeTechnique", ActeTechnique.class).getResultList();
         } finally {
-            session.close();
+            em.close();
         }
     }
 }

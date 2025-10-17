@@ -4,7 +4,7 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.Persistence;
 
-public class HibernateUtil {
+public class JPAUtil {
     private static volatile EntityManagerFactory emf;
 
     private static synchronized EntityManagerFactory getEntityManagerFactory() {
@@ -14,22 +14,19 @@ public class HibernateUtil {
             } catch (Exception e) {
                 System.err.println("Failed to create EntityManagerFactory: " + e.getMessage());
                 e.printStackTrace();
+                throw new RuntimeException("Cannot connect to database", e);
             }
         }
         return emf;
     }
 
-    public static class SessionFactory {
-        public EntityManager openSession() {
-            EntityManagerFactory factory = getEntityManagerFactory();
-            if (factory == null) {
-                throw new RuntimeException("EntityManagerFactory not initialized");
-            }
-            return factory.createEntityManager();
-        }
+    public static EntityManager getEntityManager() {
+        return getEntityManagerFactory().createEntityManager();
     }
     
-    public static SessionFactory getSessionFactory() {
-        return new SessionFactory();
+    public static void closeEntityManagerFactory() {
+        if (emf != null && emf.isOpen()) {
+            emf.close();
+        }
     }
 }

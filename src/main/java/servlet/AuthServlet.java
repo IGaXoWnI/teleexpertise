@@ -10,11 +10,16 @@ import model.Employee;
 import model.Generaliste;
 import model.Specialiste;
 import model.Infirmier;
+import model.Creneau;
 import model.enums.Role;
 import model.enums.Specialite;
+import model.enums.CreneauStatus;
 import service.AuthService;
 
 import java.io.IOException;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 
 @WebServlet("/auth")
 public class AuthServlet extends HttpServlet {
@@ -92,16 +97,45 @@ public class AuthServlet extends HttpServlet {
                     employee = new Generaliste();
                     break;
                 case SPECIALISTE:
-                    employee = new Specialiste();
+                    // use concrete Specialiste so we can add creneaux
+                    Specialiste spec = new Specialiste();
                     String specialiteStr = request.getParameter("specialite");
                     String tarifStr = request.getParameter("tarif");
                     
                     if (specialiteStr != null && !specialiteStr.isEmpty()) {
-                        ((Specialiste) employee).setSpecialite(Specialite.valueOf(specialiteStr));
+                        spec.setSpecialite(Specialite.valueOf(specialiteStr));
                     }
                     if (tarifStr != null && !tarifStr.isEmpty()) {
-                        ((Specialiste) employee).setTarif(Double.parseDouble(tarifStr));
+                        try {
+                            spec.setTarif(Double.parseDouble(tarifStr));
+                        } catch (NumberFormatException nfe) {
+                            // ignore invalid tarif, leave default
+                        }
                     }
+
+                    // parse creneaux strings like "09:00-09:30" and add to spec
+                    String[] creneaux = request.getParameterValues("creneaux");
+                    if (creneaux != null) {
+                        LocalDate today = LocalDate.now();
+                        for (String s : creneaux) {
+                            if (s == null || s.trim().isEmpty()) continue;
+                            try {
+                                String[] parts = s.split("-");
+                                if (parts.length != 2) continue;
+                                LocalTime start = LocalTime.parse(parts[0].trim());
+                                LocalTime end = LocalTime.parse(parts[1].trim());
+                                Creneau c = new Creneau();
+                                c.setDateHeureDebut(LocalDateTime.of(today, start));
+                                c.setDateHeureFin(LocalDateTime.of(today, end));
+                                c.setCreneauStatus(CreneauStatus.DISPONIBLE);
+                                spec.addCreneau(c);
+                            } catch (Exception ex) {
+                                // ignore malformed creneau values
+                            }
+                        }
+                    }
+
+                    employee = spec;
                     break;
                 case INFIRMIER:
                     employee = new Infirmier();

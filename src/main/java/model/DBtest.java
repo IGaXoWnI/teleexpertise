@@ -11,18 +11,21 @@ public class DBtest {
     private static EntityManagerFactory emf;
     private static EntityManager em;
     
-    static {
-        try {
-            emf = Persistence.createEntityManagerFactory("default");
-            em = emf.createEntityManager();
-        } catch (Exception e) {
-            System.err.println("Failed to initialize database connection: " + e.getMessage());
+    private static synchronized void initializeConnection() {
+        if (emf == null) {
+            try {
+                emf = Persistence.createEntityManagerFactory("default");
+                em = emf.createEntityManager();
+            } catch (Exception e) {
+                System.err.println("Failed to initialize database connection: " + e.getMessage());
+                throw new RuntimeException("Cannot initialize database connection", e);
+            }
         }
     }
     
-
     public static boolean testConnection() {
         try {
+            initializeConnection();
             em.getTransaction().begin();
             Query query = em.createNativeQuery("SELECT 1");
             query.getSingleResult();
@@ -30,7 +33,7 @@ public class DBtest {
             System.out.println("Database connection successful!");
             return true;
         } catch (Exception e) {
-            if (em.getTransaction().isActive()) {
+            if (em != null && em.getTransaction().isActive()) {
                 em.getTransaction().rollback();
             }
             System.err.println("Database connection failed: " + e.getMessage());
@@ -38,9 +41,9 @@ public class DBtest {
         }
     }
     
-
     public static void createSchema() {
         try {
+            initializeConnection();
             // Force Hibernate to create tables by accessing metadata
             em.getMetamodel().getEntities().forEach(entityType -> {
                 System.out.println("Entity: " + entityType.getName());
@@ -52,7 +55,7 @@ public class DBtest {
             
             System.out.println("Database schema created successfully!");
         } catch (Exception e) {
-            if (em.getTransaction().isActive()) {
+            if (em != null && em.getTransaction().isActive()) {
                 em.getTransaction().rollback();
             }
             System.err.println("Schema creation failed: " + e.getMessage());
@@ -64,6 +67,7 @@ public class DBtest {
      */
     public static void insertSampleData() {
         try {
+            initializeConnection();
             em.getTransaction().begin();
             
             // Sample data will be inserted here if needed
@@ -71,7 +75,7 @@ public class DBtest {
             
             em.getTransaction().commit();
         } catch (Exception e) {
-            if (em.getTransaction().isActive()) {
+            if (em != null && em.getTransaction().isActive()) {
                 em.getTransaction().rollback();
             }
             System.err.println("Sample data insertion failed: " + e.getMessage());
@@ -83,6 +87,7 @@ public class DBtest {
      */
     public static void replaceSchema() {
         try {
+            initializeConnection();
             em.getTransaction().begin();
             
             // Drop all sequences and tables
@@ -93,17 +98,15 @@ public class DBtest {
             System.out.println("Schema dropped and recreated!");
             
             // Close current EntityManager and recreate to force Hibernate to recreate tables
-            em.close();
-            emf.close();
-            
+            if (em != null) em.close();
+            if (emf != null) emf.close();
+
             // Reinitialize with create-drop to force table creation
             System.setProperty("hibernate.hbm2ddl.auto", "create");
             emf = Persistence.createEntityManagerFactory("default");
             em = emf.createEntityManager();
             
-            // Test connection to trigger table creation
-            testConnection();
-            
+            System.out.println("Tables recreated!");
         } catch (Exception e) {
             if (em != null && em.getTransaction().isActive()) {
                 em.getTransaction().rollback();
@@ -117,6 +120,7 @@ public class DBtest {
      */
     public static void cleanDatabase() {
         try {
+            initializeConnection();
             em.getTransaction().begin();
             
             em.createNativeQuery("TRUNCATE TABLE consultation CASCADE").executeUpdate();
@@ -131,7 +135,7 @@ public class DBtest {
             em.getTransaction().commit();
             System.out.println("Database cleaned successfully!");
         } catch (Exception e) {
-            if (em.getTransaction().isActive()) {
+            if (em != null && em.getTransaction().isActive()) {
                 em.getTransaction().rollback();
             }
             System.err.println("Database cleaning failed: " + e.getMessage());

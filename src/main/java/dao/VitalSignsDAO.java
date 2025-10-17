@@ -1,72 +1,74 @@
 package dao;
 
+import jakarta.persistence.EntityManager;
 import model.VitalSigns;
-import org.hibernate.Session;
-import org.hibernate.Transaction;
 import java.util.List;
 
 public class VitalSignsDAO {
 
     public void save(VitalSigns vitalSigns) {
-        Session session = HibernateUtil.getSessionFactory().openSession();
-        Transaction tx = null;
+        EntityManager em = JPAUtil.getEntityManager();
         try {
-            tx = session.beginTransaction();
-            session.persist(vitalSigns);
-            tx.commit();
+            em.getTransaction().begin();
+            em.persist(vitalSigns);
+            em.getTransaction().commit();
         } catch (Exception e) {
-            if (tx != null) tx.rollback();
+            if (em.getTransaction().isActive()) {
+                em.getTransaction().rollback();
+            }
             throw e;
         } finally {
-            session.close();
+            em.close();
         }
     }
 
     public void update(VitalSigns vitalSigns) {
-        Session session = HibernateUtil.getSessionFactory().openSession();
-        Transaction tx = null;
+        EntityManager em = JPAUtil.getEntityManager();
         try {
-            tx = session.beginTransaction();
-            session.merge(vitalSigns);
-            tx.commit();
+            em.getTransaction().begin();
+            em.merge(vitalSigns);
+            em.getTransaction().commit();
         } catch (Exception e) {
-            if (tx != null) tx.rollback();
+            if (em.getTransaction().isActive()) {
+                em.getTransaction().rollback();
+            }
             throw e;
         } finally {
-            session.close();
+            em.close();
         }
     }
 
     public void delete(VitalSigns vitalSigns) {
-        Session session = HibernateUtil.getSessionFactory().openSession();
-        Transaction tx = null;
+        EntityManager em = JPAUtil.getEntityManager();
         try {
-            tx = session.beginTransaction();
-            session.remove(vitalSigns);
-            tx.commit();
+            em.getTransaction().begin();
+            em.remove(em.merge(vitalSigns));
+            em.getTransaction().commit();
         } catch (Exception e) {
-            if (tx != null) tx.rollback();
+            if (em.getTransaction().isActive()) {
+                em.getTransaction().rollback();
+            }
             throw e;
         } finally {
-            session.close();
+            em.close();
         }
     }
 
     public VitalSigns findById(Long id) {
-        Session session = HibernateUtil.getSessionFactory().openSession();
+        EntityManager em = JPAUtil.getEntityManager();
         try {
-            return session.find(VitalSigns.class, id);
+            return em.find(VitalSigns.class, id);
         } finally {
-            session.close();
+            em.close();
         }
     }
 
     public List<VitalSigns> findAll() {
-        Session session = HibernateUtil.getSessionFactory().openSession();
+        EntityManager em = JPAUtil.getEntityManager();
         try {
-            return session.createQuery("FROM VitalSigns", VitalSigns.class).getResultList();
+            return em.createQuery("FROM VitalSigns", VitalSigns.class).getResultList();
         } finally {
-            session.close();
+            em.close();
         }
     }
 }

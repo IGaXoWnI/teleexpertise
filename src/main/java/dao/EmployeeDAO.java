@@ -2,8 +2,6 @@ package dao;
 
 import jakarta.persistence.EntityManager;
 import model.Employee;
-
-
 import java.util.List;
 
 public class EmployeeDAO {
@@ -15,9 +13,7 @@ public class EmployeeDAO {
             em.persist(employee);
             em.getTransaction().commit();
         } catch (Exception e) {
-            if (em.getTransaction().isActive()) {
-                em.getTransaction().rollback();
-            }
+            if (em.getTransaction().isActive()) em.getTransaction().rollback();
             throw e;
         } finally {
             em.close();
@@ -31,9 +27,7 @@ public class EmployeeDAO {
             em.merge(employee);
             em.getTransaction().commit();
         } catch (Exception e) {
-            if (em.getTransaction().isActive()) {
-                em.getTransaction().rollback();
-            }
+            if (em.getTransaction().isActive()) em.getTransaction().rollback();
             throw e;
         } finally {
             em.close();
@@ -47,9 +41,7 @@ public class EmployeeDAO {
             em.remove(em.merge(employee));
             em.getTransaction().commit();
         } catch (Exception e) {
-            if (em.getTransaction().isActive()) {
-                em.getTransaction().rollback();
-            }
+            if (em.getTransaction().isActive()) em.getTransaction().rollback();
             throw e;
         } finally {
             em.close();

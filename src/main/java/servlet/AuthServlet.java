@@ -74,7 +74,8 @@ public class AuthServlet extends HttpServlet {
                 request.getRequestDispatcher("login.jsp").forward(request, response);
             }
         } catch (Exception e) {
-            request.setAttribute("error", "Erreur de connexion");
+            // Do not print stack trace; return a generic error message
+            request.setAttribute("error", "Erreur de connexion: " + e.getMessage());
             request.getRequestDispatcher("login.jsp").forward(request, response);
         }
     }
@@ -103,7 +104,19 @@ public class AuthServlet extends HttpServlet {
                     String tarifStr = request.getParameter("tarif");
                     
                     if (specialiteStr != null && !specialiteStr.isEmpty()) {
-                        spec.setSpecialite(Specialite.valueOf(specialiteStr));
+                        try {
+                            spec.setSpecialite(Specialite.valueOf(specialiteStr.trim().toUpperCase()));
+                        } catch (IllegalArgumentException iae) {
+                            // invalid enum value from the client; return an error to the user
+                            request.setAttribute("error", "Spécialité invalide sélectionnée: " + specialiteStr);
+                            request.getRequestDispatcher("register.jsp").forward(request, response);
+                            return;
+                        }
+                    } else {
+                        // specialite is required for specialists
+                        request.setAttribute("error", "Veuillez sélectionner une spécialité pour le spécialiste.");
+                        request.getRequestDispatcher("register.jsp").forward(request, response);
+                        return;
                     }
                     if (tarifStr != null && !tarifStr.isEmpty()) {
                         try {
@@ -156,6 +169,7 @@ public class AuthServlet extends HttpServlet {
             request.getRequestDispatcher("login.jsp").forward(request, response);
             
         } catch (Exception e) {
+            // Do not print stack trace here; forward the error message to the register page
             request.setAttribute("error", "Erreur lors de l'inscription: " + e.getMessage());
             request.getRequestDispatcher("register.jsp").forward(request, response);
         }

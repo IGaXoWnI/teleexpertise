@@ -5,26 +5,13 @@ import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.Persistence;
 
 public class JPAUtil {
-    private static volatile EntityManagerFactory emf;
-
-    private static synchronized EntityManagerFactory getEntityManagerFactory() {
-        if (emf == null) {
-            try {
-                emf = Persistence.createEntityManagerFactory("default");
-            } catch (Exception e) {
-                System.err.println("Failed to create EntityManagerFactory: " + e.getMessage());
-                e.printStackTrace();
-                throw new RuntimeException("Cannot connect to database", e);
-            }
-        }
-        return emf;
-    }
-
+    private static final EntityManagerFactory emf = Persistence.createEntityManagerFactory("default");
+    
     public static EntityManager getEntityManager() {
-        return getEntityManagerFactory().createEntityManager();
+        return emf.createEntityManager();
     }
     
-    public static void closeEntityManagerFactory() {
+    public static void close() {
         if (emf != null && emf.isOpen()) {
             emf.close();
         }

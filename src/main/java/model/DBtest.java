@@ -17,7 +17,6 @@ public class DBtest {
                 emf = Persistence.createEntityManagerFactory("default");
                 em = emf.createEntityManager();
             } catch (Exception e) {
-                System.err.println("Failed to initialize database connection: " + e.getMessage());
                 throw new RuntimeException("Cannot initialize database connection", e);
             }
         }
@@ -30,13 +29,11 @@ public class DBtest {
             Query query = em.createNativeQuery("SELECT 1");
             query.getSingleResult();
             em.getTransaction().commit();
-            System.out.println("Database connection successful!");
             return true;
         } catch (Exception e) {
             if (em != null && em.getTransaction().isActive()) {
                 em.getTransaction().rollback();
             }
-            System.err.println("Database connection failed: " + e.getMessage());
             return false;
         }
     }
@@ -46,19 +43,16 @@ public class DBtest {
             initializeConnection();
             // Force Hibernate to create tables by accessing metadata
             em.getMetamodel().getEntities().forEach(entityType -> {
-                System.out.println("Entity: " + entityType.getName());
+                // no debug output
             });
             
             em.getTransaction().begin();
             em.createNativeQuery("SELECT 1").getSingleResult();
             em.getTransaction().commit();
-            
-            System.out.println("Database schema created successfully!");
         } catch (Exception e) {
             if (em != null && em.getTransaction().isActive()) {
                 em.getTransaction().rollback();
             }
-            System.err.println("Schema creation failed: " + e.getMessage());
         }
     }
     
@@ -71,14 +65,12 @@ public class DBtest {
             em.getTransaction().begin();
             
             // Sample data will be inserted here if needed
-            System.out.println("Sample data insertion completed!");
-            
+
             em.getTransaction().commit();
         } catch (Exception e) {
             if (em != null && em.getTransaction().isActive()) {
                 em.getTransaction().rollback();
             }
-            System.err.println("Sample data insertion failed: " + e.getMessage());
         }
     }
     
@@ -95,8 +87,7 @@ public class DBtest {
             em.createNativeQuery("CREATE SCHEMA public").executeUpdate();
             
             em.getTransaction().commit();
-            System.out.println("Schema dropped and recreated!");
-            
+
             // Close current EntityManager and recreate to force Hibernate to recreate tables
             if (em != null) em.close();
             if (emf != null) emf.close();
@@ -106,12 +97,10 @@ public class DBtest {
             emf = Persistence.createEntityManagerFactory("default");
             em = emf.createEntityManager();
             
-            System.out.println("Tables recreated!");
         } catch (Exception e) {
             if (em != null && em.getTransaction().isActive()) {
                 em.getTransaction().rollback();
             }
-            System.err.println("Schema replacement failed: " + e.getMessage());
         }
     }
     
@@ -133,12 +122,10 @@ public class DBtest {
             em.createNativeQuery("TRUNCATE TABLE patient CASCADE").executeUpdate();
             
             em.getTransaction().commit();
-            System.out.println("Database cleaned successfully!");
         } catch (Exception e) {
             if (em != null && em.getTransaction().isActive()) {
                 em.getTransaction().rollback();
             }
-            System.err.println("Database cleaning failed: " + e.getMessage());
         }
     }
     
@@ -146,13 +133,10 @@ public class DBtest {
      * Run all migration tasks
      */
     public static void migrate() {
-        System.out.println("Starting database migration...");
-        
         if (testConnection()) {
             createSchema();
-            System.out.println("Migration completed successfully!");
         } else {
-            System.err.println("Migration failed - no database connection!");
+            // no-op on failure
         }
     }
     
@@ -178,7 +162,7 @@ public class DBtest {
                     replaceSchema();
                     break;
                 default:
-                    System.out.println("Usage: java model.DBtest [test|migrate|clean|sample|replace]");
+                    // usage info removed to avoid debug prints
             }
         } else {
             migrate();

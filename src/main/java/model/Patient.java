@@ -8,7 +8,10 @@ import static jakarta.persistence.GenerationType.*;
 
 @Entity(name = "Patient")
 @Table(name = "patient" ,
-        uniqueConstraints = {@UniqueConstraint(name = "phoneNumberConstraint" , columnNames ="phoneNumber" )}
+        uniqueConstraints = {
+            @UniqueConstraint(name = "phoneNumberConstraint" , columnNames ="phone_number" ),
+            @UniqueConstraint(name = "ssnConstraint" , columnNames ="ssn" )
+        }
 )
 public class Patient {
     @Id
@@ -64,6 +67,13 @@ public class Patient {
     )
     private String address ;
 
+    @Column(
+            name = "ssn",
+            nullable = false,
+            columnDefinition = "TEXT"
+    )
+    private String socialSecurityNumber ;
+
 
     public Long getId() {
         return id;
@@ -87,6 +97,10 @@ public class Patient {
 
     public String getAdress() {
         return address;
+    }
+
+    public String getSocialSecurityNumber() {
+        return socialSecurityNumber;
     }
 
 
@@ -114,6 +128,10 @@ public class Patient {
         this.address = adress;
     }
 
+    public void setSocialSecurityNumber(String socialSecurityNumber) {
+        this.socialSecurityNumber = socialSecurityNumber;
+    }
+
     @Override
     public String toString() {
         return "Patient{" +
@@ -123,6 +141,7 @@ public class Patient {
                 ", birthDate=" + birthDate +
                 ", phoneNumber='" + phoneNumber + '\'' +
                 ", adress='" + address + '\'' +
+                ", ssn='" + socialSecurityNumber + '\'' +
                 '}';
     }
 }

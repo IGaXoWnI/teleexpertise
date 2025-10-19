@@ -5,23 +5,29 @@ import jakarta.persistence.EntityManager;
 
 public class TestConnection {
     public static void main(String[] args) {
-        System.out.println("Testing database connection...");
         try {
             EntityManager em = JPAUtil.getEntityManager();
-            System.out.println("✓ EntityManager created successfully");
 
             // Test a simple query
             Long count = em.createQuery("SELECT COUNT(e) FROM Employee e", Long.class).getSingleResult();
-            System.out.println("✓ Query executed successfully");
-            System.out.println("✓ Employee count: " + count);
 
             em.close();
-            System.out.println("✓ Connection test PASSED");
+            // success: exit normally
+            return;
         } catch (Exception e) {
-            System.err.println("✗ Connection test FAILED");
-            System.err.println("Error: " + e.getMessage());
-            e.printStackTrace();
+            // On failure, attempt rollback if possible, then exit with non-zero status
+            try {
+                EntityManager em = JPAUtil.getEntityManager();
+                if (em != null && em.getTransaction().isActive()) {
+                    em.getTransaction().rollback();
+                }
+                if (em != null && em.isOpen()) {
+                    em.close();
+                }
+            } catch (Exception ignored) {
+                // ignore secondary errors
+            }
+            System.exit(1);
         }
     }
 }
-

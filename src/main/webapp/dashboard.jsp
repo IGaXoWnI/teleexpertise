@@ -105,7 +105,7 @@
         <div class="brand">MedExpert</div>
         <div style="display:flex;gap:12px;align-items:center">
             <div class="user-meta">Infirmier · <strong><%= user.getPrenom() %> <%= user.getNom() %></strong></div>
-            <a href="logout" class="button-ghost">Déconnexion</a>
+            <a href="auth" class="button-ghost">Déconnexion</a>
         </div>
     </div>
 

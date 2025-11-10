@@ -3,6 +3,8 @@ package service;
 import dao.EmployeeDAO;
 import model.Employee;
 import org.mindrot.jbcrypt.BCrypt;
+import service.servicesInterfaces.IAuthService;
+
 import java.util.HashSet;
 import java.util.Set;
 

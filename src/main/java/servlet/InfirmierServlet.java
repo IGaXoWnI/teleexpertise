@@ -21,13 +21,21 @@ public class InfirmierServlet extends HttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        // Show form to create new patient
+        model.Employee user = (model.Employee) req.getSession().getAttribute("user");
+        if (user == null || !(user instanceof model.Infirmier)) {
+            resp.sendRedirect("page/login");
+            return;
+        }
         req.getRequestDispatcher("/new_patient.jsp").forward(req, resp);
     }
 
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        // Handle create patient
+        model.Employee user = (model.Employee) req.getSession().getAttribute("user");
+        if (user == null || !(user instanceof model.Infirmier)) {
+            resp.sendRedirect("page/login");
+            return;
+        }
         req.setCharacterEncoding("UTF-8");
         String firstName = req.getParameter("firstName");
         String lastName = req.getParameter("lastName");
@@ -55,14 +63,12 @@ public class InfirmierServlet extends HttpServlet {
         p.setLastName(lastName.trim());
         p.setBirthDate(birthDate);
         p.setPhoneNumber(phoneNumber.trim());
-        // the Patient model uses setAdress (typo) — use it
         p.setAdress(address == null ? null : address.trim());
 
         try {
             infirmierService.addPatient(p);
-            // Use PRG pattern: redirect to dashboard with a flash-like message using session
             req.getSession().setAttribute("success", "Patient enregistré avec succès.");
-            resp.sendRedirect(req.getContextPath() + "/dashboard.jsp");
+            resp.sendRedirect(req.getContextPath() + "/page/dashboard");
         } catch (Exception e) {
             req.setAttribute("error", e.getMessage());
             req.getRequestDispatcher("/new_patient.jsp").forward(req, resp);

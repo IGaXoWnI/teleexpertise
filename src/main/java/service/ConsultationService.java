@@ -6,6 +6,7 @@ import model.Consultation;
 import model.Generaliste;
 import model.Patient;
 import model.enums.ConsultationStatus;
+import service.servicesInterfaces.IConsultationService;
 
 import java.time.LocalDateTime;
 

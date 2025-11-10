@@ -1,4 +1,4 @@
-package service;
+package service.servicesInterfaces;
 
 import model.VitalSigns;
 import java.util.List;

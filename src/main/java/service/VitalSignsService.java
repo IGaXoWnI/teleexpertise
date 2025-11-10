@@ -4,6 +4,7 @@ import dao.PatientDAO;
 import dao.VitalSignsDAO;
 import model.Patient;
 import model.VitalSigns;
+import service.servicesInterfaces.IVitalSignsService;
 
 import java.time.LocalDateTime;
 import java.util.List;

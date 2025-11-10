@@ -48,7 +48,7 @@
         <h1>Tableau de bord - Généraliste</h1>
         <div class="user-info">
             <span class="muted">Dr. <%= user.getPrenom() %> <%= user.getNom() %></span>
-            <a href="auth?action=logout" class="btn">Déconnexion</a>
+            <a href="auth" class="btn">Déconnexion</a>
         </div>
     </div>
 

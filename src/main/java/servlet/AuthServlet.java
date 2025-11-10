@@ -29,7 +29,6 @@ public class AuthServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) 
             throws ServletException, IOException {
-        // Handle logout
         HttpSession session = request.getSession(false);
         if (session != null) {
             Employee user = (Employee) session.getAttribute("user");
@@ -38,7 +37,7 @@ public class AuthServlet extends HttpServlet {
             }
             session.invalidate();
         }
-        response.sendRedirect("login.jsp");
+        response.sendRedirect("page/login");
     }
     
     @Override
@@ -68,17 +67,12 @@ public class AuthServlet extends HttpServlet {
                 session.setAttribute("user", employee);
                 session.setAttribute("userRole", employee.getRole());
                 
-                if (employee.getRole() == Role.GENERALISTE) {
-                    response.sendRedirect("generaliste_dashboard.jsp");
-                } else {
-                    response.sendRedirect("dashboard.jsp");
-                }
+                response.sendRedirect("page/dashboard");
             } else {
                 request.setAttribute("error", "Email ou mot de passe incorrect");
                 request.getRequestDispatcher("login.jsp").forward(request, response);
             }
         } catch (Exception e) {
-            // Do not print stack trace; return a generic error message
             request.setAttribute("error", "Erreur de connexion: " + e.getMessage());
             request.getRequestDispatcher("login.jsp").forward(request, response);
         }
@@ -102,7 +96,6 @@ public class AuthServlet extends HttpServlet {
                     employee = new Generaliste();
                     break;
                 case SPECIALISTE:
-                    // use concrete Specialiste so we can add creneaux
                     Specialiste spec = new Specialiste();
                     String specialiteStr = request.getParameter("specialite");
                     String tarifStr = request.getParameter("tarif");
@@ -111,13 +104,11 @@ public class AuthServlet extends HttpServlet {
                         try {
                             spec.setSpecialite(Specialite.valueOf(specialiteStr.trim().toUpperCase()));
                         } catch (IllegalArgumentException iae) {
-                            // invalid enum value from the client; return an error to the user
                             request.setAttribute("error", "Spécialité invalide sélectionnée: " + specialiteStr);
                             request.getRequestDispatcher("register.jsp").forward(request, response);
                             return;
                         }
                     } else {
-                        // specialite is required for specialists
                         request.setAttribute("error", "Veuillez sélectionner une spécialité pour le spécialiste.");
                         request.getRequestDispatcher("register.jsp").forward(request, response);
                         return;
@@ -126,11 +117,9 @@ public class AuthServlet extends HttpServlet {
                         try {
                             spec.setTarif(Double.parseDouble(tarifStr));
                         } catch (NumberFormatException nfe) {
-                            // ignore invalid tarif, leave default
                         }
                     }
 
-                    // parse creneaux strings like "09:00-09:30" and add to spec
                     String[] creneaux = request.getParameterValues("creneaux");
                     if (creneaux != null) {
                         LocalDate today = LocalDate.now();
@@ -147,7 +136,6 @@ public class AuthServlet extends HttpServlet {
                                 c.setCreneauStatus(CreneauStatus.DISPONIBLE);
                                 spec.addCreneau(c);
                             } catch (Exception ex) {
-                                // ignore malformed creneau values
                             }
                         }
                     }
@@ -173,7 +161,6 @@ public class AuthServlet extends HttpServlet {
             request.getRequestDispatcher("login.jsp").forward(request, response);
             
         } catch (Exception e) {
-            // Do not print stack trace here; forward the error message to the register page
             request.setAttribute("error", "Erreur lors de l'inscription: " + e.getMessage());
             request.getRequestDispatcher("register.jsp").forward(request, response);
         }

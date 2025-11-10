@@ -22,7 +22,7 @@ public class GeneralisteServlet extends HttpServlet {
         
         Employee user = (Employee) req.getSession().getAttribute("user");
         if (user == null || !(user instanceof Generaliste)) {
-            resp.sendRedirect("login.jsp");
+            resp.sendRedirect("page/login");
             return;
         }
 
@@ -36,7 +36,7 @@ public class GeneralisteServlet extends HttpServlet {
         if (patientIdStr == null || motif == null || motif.trim().isEmpty() || 
             observations == null || observations.trim().isEmpty() || coutStr == null) {
             req.getSession().setAttribute("error", "Veuillez remplir tous les champs requis");
-            resp.sendRedirect("add_consultation.jsp?patientId=" + patientIdStr);
+            resp.sendRedirect("page/add-consultation?patientId=" + patientIdStr);
             return;
         }
 
@@ -48,13 +48,13 @@ public class GeneralisteServlet extends HttpServlet {
                     observations, diagnostic, traitement, cout);
             
             req.getSession().setAttribute("success", "Consultation enregistrée avec succès");
-            resp.sendRedirect("generaliste_dashboard.jsp");
+            resp.sendRedirect("page/dashboard");
         } catch (NumberFormatException e) {
             req.getSession().setAttribute("error", "Valeurs numériques invalides");
-            resp.sendRedirect("add_consultation.jsp?patientId=" + patientIdStr);
+            resp.sendRedirect("page/add-consultation?patientId=" + patientIdStr);
         } catch (Exception e) {
             req.getSession().setAttribute("error", e.getMessage());
-            resp.sendRedirect("add_consultation.jsp?patientId=" + patientIdStr);
+            resp.sendRedirect("page/add-consultation?patientId=" + patientIdStr);
         }
     }
 }

@@ -68,7 +68,11 @@ public class AuthServlet extends HttpServlet {
                 session.setAttribute("user", employee);
                 session.setAttribute("userRole", employee.getRole());
                 
-                response.sendRedirect("dashboard.jsp");
+                if (employee.getRole() == Role.GENERALISTE) {
+                    response.sendRedirect("generaliste_dashboard.jsp");
+                } else {
+                    response.sendRedirect("dashboard.jsp");
+                }
             } else {
                 request.setAttribute("error", "Email ou mot de passe incorrect");
                 request.getRequestDispatcher("login.jsp").forward(request, response);

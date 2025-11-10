@@ -3,7 +3,7 @@ package service;
 import dao.PatientDAO;
 import model.Patient;
 
-public class InfirmierService {
+public class InfirmierService implements IInfirmierService {
     private final PatientDAO patientDAO = new PatientDAO();
 
     /**

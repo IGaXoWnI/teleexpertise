@@ -6,7 +6,7 @@ import org.mindrot.jbcrypt.BCrypt;
 import java.util.HashSet;
 import java.util.Set;
 
-public class AuthService {
+public class AuthService implements IAuthService {
     EmployeeDAO employeeDAO = new EmployeeDAO();
     private Set<String> activeSessions = new HashSet<>();
 

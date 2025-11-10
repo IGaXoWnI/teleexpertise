@@ -8,7 +8,7 @@ import model.VitalSigns;
 import java.time.LocalDateTime;
 import java.util.List;
 
-public class VitalSignsService {
+public class VitalSignsService implements IVitalSignsService {
     
     private VitalSignsDAO vitalSignsDAO = new VitalSignsDAO();
     private PatientDAO patientDAO = new PatientDAO();
